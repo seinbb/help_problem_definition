@@ -68,23 +68,96 @@ async function generateContentWithFallback(options: {
 // -------------------------------------------------------------
 // Helper function to mock evaluation when API key is missing
 // -------------------------------------------------------------
+interface Deficiency {
+  title: string;
+  description: string;
+}
+
 function getMockEvaluation(proposalText: string) {
   const wordsCount = proposalText.length;
-  const score = Math.min(60 + Math.floor(wordsCount / 15), 95);
   
-  const userProblem = Math.floor(score * 0.2);
-  const pipelineDesign = Math.floor(score * 0.25);
-  const dataStrategy = Math.floor(score * 0.25);
-  const riskGovernance = Math.floor(score * 0.2);
-  const feasibility = Math.floor(score * 0.1);
+  // Base scores starting at maximum
+  let compliance = 30;
+  let userProblem = 15;
+  let pipelineDesign = 15;
+  let dataStrategy = 15;
+  let riskGovernance = 15;
+  let feasibility = 10;
+  
+  const deficiencies: Deficiency[] = [];
+  const comments = {
+    medicalViolation: "의료법/전문직 직접 대체 소지가 식별되지 않아 준법 요건을 충족합니다.",
+    surveillanceViolation: "타인 감시, 권리 억압 등 모니터링 성격이 감지되지 않아 안전합니다.",
+    biasViolation: "특정 성별, 연령, 계층에 대한 유의미한 편향 위험성이 감지되지 않았습니다.",
+    harmfulViolation: "디프페이크, 언어 폭력, 유해 생성 등 윤리적 리스크가 발견되지 않았습니다.",
+    userProblem: "Who, When/Where, What, Why의 4대 요소 연계가 무난히 기술되었습니다.",
+    pipelineDesign: "[입력 -> 인식 -> 생성 AI -> 결과 UI] 흐름이 정상적으로 수립되었습니다.",
+    dataStrategy: "RAG 대책 및 출처를 간략히 명시하여 환각 예방 계획이 보완되어 있습니다.",
+    riskGovernance: "개인정보 보존/삭제 계획 및 비상대피 수단이 마련되어 있습니다.",
+    feasibility: "정상 및 예외적 상황을 시각화할 수 있는 시나리오가 수립되어 있습니다."
+  };
 
-  // Distribute scores across sub-criteria proportionally
-  const userProblemPercent = userProblem / 20;
-  const pipelineDesignPercent = pipelineDesign / 25;
-  const dataStrategyPercent = dataStrategy / 25;
-  const riskGovernancePercent = riskGovernance / 20;
-  const feasibilityPercent = feasibility / 10;
+  // 1. Compliance Scan (윤리적·법적 리스크 및 공식 논란 차단)
+  if (proposalText.includes("공부방") || proposalText.includes("집중") || proposalText.includes("감시") || proposalText.includes("CCTV") || proposalText.includes("모니터링")) {
+    compliance -= 15;
+    comments.surveillanceViolation = "공부방 학생들을 실시간 CCTV/웹캠으로 자동 감시 및 집중도 채점하는 아키텍처는 개인 자유 억압 및 감시 논란 우려가 큽니다.";
+    deficiencies.push({
+      title: "[윤리적·법적 리스크] [공식 논란 경고] 기술 오남용 및 감시 통제 구조 심각",
+      description: "기획서 내에서 학생들의 '졸음 및 딴짓 감지', '공부방 대시보드 부모 공유'를 실시간 웹캠 비디오로 전송하는 방식은 타인의 일상을 강제 감시하여 기본권을 침해합니다. 감시용 CCTV 구도를 제거하고, 학생 스스로 자발적으로 켜고 끄는 자기 주도성 알림 위젯 혹은 완전 익명화된 주간 세션 요약 방식으로 전면 리디자인하여 인권 침해 논란을 차단하십시오."
+    });
+  }
+  
+  if (proposalText.includes("치료") || proposalText.includes("진단") || proposalText.includes("의사") || proposalText.includes("수의사") || proposalText.includes("법률 자문")) {
+    compliance -= 15;
+    comments.medicalViolation = "AI가 전문 면허 소지자(의사, 수의사 등)를 온전히 대체하여 직접 진단을 내리는 묘사는 의료법 및 관계법 위반 소지가 매우 높습니다.";
+    deficiencies.push({
+      title: "[윤리적·법적 리스크] [공식 논란 경고] 전문직 면허 직무(의료법/수의사법) 위반 소지",
+      description: "기획서 중 '수의학 임상 상태 정리', '가능성 높은 질환 판단' 등을 AI가 직접 결정하여 보호자에게 수의사 소견처럼 송출하는 부분은 국내 수의사법 및 의료법 제56조(무면허 진료) 위반 소지가 아주 큽니다. AI의 직무를 '공식 수의사 진단 대체'가 아닌 '수의학 정보 조회 보조 가이드 생성'으로 명확하게 역할을 격하시키고, 화면 최하단에 '전문가 소견을 대체하지 않는다'는 컴플라이언스 경고 팝업을 상시 표출하도록 아키텍처를 개선하십시오."
+    });
+  }
 
+  // 2. User Problem Scan
+  if (proposalText.length < 300) {
+    userProblem -= 5;
+    comments.userProblem = "문제 당사자(Who) 및 도입 타당성 중 누락되거나 모호한 요소가 보입니다.";
+    deficiencies.push({
+      title: "[사용자 및 문제 정의] 문제 상황 요소 누락 및 AI 필요성 기술 부실",
+      description: "기획서 내용 중 사용자 페인 포인트 상황 설명이 단편적이어서 기술 도입의 절박한 당위성(Why)이 약합니다. '1인 가구 직장인' 또는 '시각장애 보행자' 등의 키워드를 적극적으로 활용하여 타겟 사용자의 절실한 불편함을 구체적인 데이터와 함께 인용해 주십시오."
+    });
+  }
+
+  // 3. Pipeline Design Scan
+  if (!proposalText.includes("UI") && !proposalText.includes("화면") && !proposalText.includes("앱")) {
+    pipelineDesign -= 5;
+    comments.pipelineDesign = "최종 사용자에게 피드백을 전달하는 UI 및 인터페이스 설계가 미흡합니다.";
+    deficiencies.push({
+      title: "[AI 서비스 파이프라인] 최종 사용자 결과 UI 가시성 부족",
+      description: "AI 모델의 추론 브리프 데이터를 사용자에게 어떻게 직관적으로 보여줄지에 대한 UI 명세가 불분명합니다. 모바일 앱 전용 푸시 알림, 응급 10초 요약 비디오 클립, 챗봇 Q&A 위젯 등 최종 사용자 결과 전달 방식을 입체적으로 확장하십시오."
+    });
+  }
+
+  // 4. Data Strategy Scan
+  if (!proposalText.includes("RAG") && !proposalText.includes("환각")) {
+    dataStrategy -= 10;
+    comments.dataStrategy = "벡터 DB 활용 또는 RAG 환각 방지 조치가 결여되어 허위 정보 전송 위험이 있습니다.";
+    deficiencies.push({
+      title: "[데이터 전략 및 RAG 검증] 거대언어모델 생성 환각(Hallucination) 방지책 누락",
+      description: "실시간 정보 생성 과정에서 Gemini가 임의로 그럴듯한 거짓말을 지어내는 환각 현상을 차단할 검증 계획이 기획서 상에 명시되지 않았습니다. 공인 표준 문서나 의학 사전 등을 벡터 데이터베이스(ChromaDB)에 우선 적재한 후 탑 K 기준 관련성 높은 증거만 컨텍스트에 한정하여 입력하게 하는 RAG 파이프라인을 기획서에 필히 반영하십시오."
+    });
+  }
+
+  // 5. Risk Governance Scan
+  if (!proposalText.includes("삭제") && !proposalText.includes("파기") && !proposalText.includes("기간")) {
+    riskGovernance -= 5;
+    comments.riskGovernance = "수집된 영상 등 개인 민감 정보의 안전한 보존 기간과 파기 규칙이 부재합니다.";
+    deficiencies.push({
+      title: "[리스크 거버넌스] 개인정보 보존 및 영구 파쇄 생애주기 미비",
+      description: "실시간 비디오 데이터가 유입되는 기획 구조임에도 보존 기간과 삭제 방법이 불분명합니다. '개인정보보호법 준수 및 가입 해지 시 7일 이내 원천 파쇄 및 복구 불가 영구 삭제' 정책을 명시하고 AES-256 저장 암호화 로드맵을 추가 제안하십시오."
+    });
+  }
+
+  const score = compliance + userProblem + pipelineDesign + dataStrategy + riskGovernance + feasibility;
+  
   const getStatus = (current: number, max: number): "Met" | "Partial" | "Unmet" => {
     if (current >= max) return "Met";
     if (current > 0) return "Partial";
@@ -92,192 +165,167 @@ function getMockEvaluation(proposalText: string) {
   };
 
   const rubricChecklist = [
-    // 1. 사용자 및 문제 정의
+    // 1. 윤리적·법적 리스크 및 공식 논란 차단 (최대 30점)
     {
-      category: "userProblem" as const,
-      name: "문제 당사자(Who) 기술의 구체성",
-      maxScore: 5,
-      score: Math.round(5 * userProblemPercent),
-      isMet: getStatus(Math.round(5 * userProblemPercent), 5),
-      comment: "수혜자 그룹을 명확히 정의함"
+      category: "compliance" as const,
+      name: "의료법/전문직 위반 여부 (의사/약사 대체 등 무면허 행위 차단)",
+      maxScore: 8,
+      score: compliance >= 30 ? 8 : (compliance >= 15 ? 4 : 0),
+      isMet: getStatus(compliance >= 30 ? 8 : (compliance >= 15 ? 4 : 0), 8),
+      comment: comments.medicalViolation
     },
     {
-      category: "userProblem" as const,
-      name: "발생 상황(When/Where) 현실성",
-      maxScore: 5,
-      score: Math.round(5 * userProblemPercent),
-      isMet: getStatus(Math.round(5 * userProblemPercent), 5),
-      comment: "구체적 페인포인트 상황을 포착함"
+      category: "compliance" as const,
+      name: "기술 오남용 및 감시 (CCTV 등을 통한 기본권 침해 감시 통제 여부)",
+      maxScore: 8,
+      score: compliance >= 30 ? 8 : (compliance >= 15 ? 4 : 0),
+      isMet: getStatus(compliance >= 30 ? 8 : (compliance >= 15 ? 4 : 0), 8),
+      comment: comments.surveillanceViolation
     },
     {
-      category: "userProblem" as const,
-      name: "구체적 불편(What)과 AI 필요성",
-      maxScore: 5,
-      score: Math.round(5 * userProblemPercent),
-      isMet: getStatus(Math.round(5 * userProblemPercent), 5),
-      comment: "기존 솔루션 대비 AI 도입의 가치가 잘 서술됨"
+      category: "compliance" as const,
+      name: "차별 및 편향 (성별/연령/인종에 대한 공평한 결과물 도출)",
+      maxScore: 7,
+      score: 7,
+      isMet: "Met" as const,
+      comment: comments.biasViolation
     },
     {
-      category: "userProblem" as const,
-      name: "기대 변화(Why)의 논리적 연계",
-      maxScore: 5,
-      score: Math.round(5 * userProblemPercent),
-      isMet: getStatus(Math.round(5 * userProblemPercent), 5),
-      comment: "해결 방안과 요구사항이 일치함"
-    },
-
-    // 2. AI 파이프라인 구조 설계
-    {
-      category: "pipelineDesign" as const,
-      name: "입력 데이터(Input) 규격 기술",
-      maxScore: 5,
-      score: Math.round(5 * pipelineDesignPercent),
-      isMet: getStatus(Math.round(5 * pipelineDesignPercent), 5),
-      comment: "원천 데이터 및 파일 규격이 정의됨"
-    },
-    {
-      category: "pipelineDesign" as const,
-      name: "인식 도구(AI 모델) 기술 구체성",
-      maxScore: 5,
-      score: Math.round(5 * pipelineDesignPercent),
-      isMet: getStatus(Math.round(5 * pipelineDesignPercent), 5),
-      comment: "센서 또는 분석용 AI 모델 명칭 제시"
-    },
-    {
-      category: "pipelineDesign" as const,
-      name: "생성형 AI의 핵심 역할(LLM 추론)",
-      maxScore: 10,
-      score: Math.round(10 * pipelineDesignPercent),
-      isMet: getStatus(Math.round(10 * pipelineDesignPercent), 10),
-      comment: "생성형 AI의 요약 및 전문가 추론 활용도 기술"
-    },
-    {
-      category: "pipelineDesign" as const,
-      name: "최종 사용자 UI 및 전달 피드백",
-      maxScore: 5,
-      score: Math.round(5 * pipelineDesignPercent),
-      isMet: getStatus(Math.round(5 * pipelineDesignPercent), 5),
-      comment: "사용자에게 도달하는 알림 및 웹 화면 상세화"
+      category: "compliance" as const,
+      name: "표현 및 유해성 (디프페이크, 언어 폭력, 불합리한 유해 생성물 통제)",
+      maxScore: 7,
+      score: 7,
+      isMet: "Met" as const,
+      comment: comments.harmfulViolation
     },
 
-    // 3. 데이터 전략 및 신뢰성/RAG 검증 계획
+    // 2. 사용자 및 문제 정의 (최대 15점)
     {
-      category: "dataStrategy" as const,
-      name: "공공/상업용 데이터 출처 확보",
-      maxScore: 5,
-      score: Math.round(5 * dataStrategyPercent),
-      isMet: getStatus(Math.round(5 * dataStrategyPercent), 5),
-      comment: "수집 데이터 포털 또는 구축 출처 명시"
+      category: "userProblem" as const,
+      name: "4대 필수 요소(Who, When/Where, What, Why) 연계성 구체성",
+      maxScore: 8,
+      score: userProblem >= 15 ? 8 : 4,
+      isMet: getStatus(userProblem >= 15 ? 8 : 4, 8),
+      comment: comments.userProblem
     },
     {
+      category: "userProblem" as const,
+      name: "기술 도입의 구체적 타당성 및 정당한 당위성 확보",
+      maxScore: 7,
+      score: userProblem >= 15 ? 7 : 4,
+      isMet: getStatus(userProblem >= 15 ? 7 : 4, 7),
+      comment: "수동 분석 한계를 탈피한 인공지능 도입 당위성은 잘 작성되었습니다."
+    },
+
+    // 3. AI 서비스 파이프라인 구조 설계 (최대 15점)
+    {
+      category: "pipelineDesign" as const,
+      name: "[입력 데이터 ➡️ 인식 도구 ➡️ 생성형 AI의 역할 ➡️ 최종 결과 UI] 유기성",
+      maxScore: 8,
+      score: pipelineDesign >= 15 ? 8 : 4,
+      isMet: getStatus(pipelineDesign >= 15 ? 8 : 4, 8),
+      comment: comments.pipelineDesign
+    },
+    {
+      category: "pipelineDesign" as const,
+      name: "단순 챗봇 호출에 그치지 않고 입체적 파이프라인 정합성 구현",
+      maxScore: 7,
+      score: 7,
+      isMet: "Met" as const,
+      comment: "YOLO 객체 검출기와 거대언어모델의 연동 정합성이 튼튼합니다."
+    },
+
+    // 4. 데이터 전략 및 저작권/RAG 검증 계획 (최대 15점)
+    {
       category: "dataStrategy" as const,
-      name: "저작권 및 사용 허가(라이선스) 확인",
+      name: "공공 및 상업 데이터 획득 출처 수집 계획과 수집량 타당성",
       maxScore: 5,
-      score: Math.round(5 * dataStrategyPercent),
-      isMet: getStatus(Math.round(5 * dataStrategyPercent), 5),
-      comment: "상업적 이용 가능 여부(CC-BY 등) 검토 필요"
+      score: 5,
+      isMet: "Met" as const,
+      comment: "AI Hub 등의 원천 소스를 적합하게 확보하고 기재했습니다."
     },
     {
       category: "dataStrategy" as const,
-      name: "정제 및 라벨링 기준 구체성",
+      name: "데이터 저작권(CC-BY, CC-BY-NC 등 라이선스 규격) 사전 확인",
       maxScore: 5,
-      score: Math.round(5 * dataStrategyPercent),
-      isMet: getStatus(Math.round(5 * dataStrategyPercent), 5),
-      comment: "수동 태깅 및 검수 기준 수립 미흡"
+      score: 5,
+      isMet: "Met" as const,
+      comment: "오픈소스 이용 약관 및 저작권법 준수 의도를 표출했습니다."
     },
     {
       category: "dataStrategy" as const,
-      name: "RAG 도입을 통한 생성형 AI 환각 방지",
-      maxScore: 10,
-      score: Math.round(10 * dataStrategyPercent),
-      isMet: getStatus(Math.round(10 * dataStrategyPercent), 10),
-      comment: "도서 및 수의학 가이드 기반 벡터DB 활용 방안 제시"
+      name: "환각(Hallucination) 방지를 위한 벡터 DB 임베딩 및 RAG 구체성",
+      maxScore: 5,
+      score: dataStrategy >= 15 ? 5 : 0,
+      isMet: getStatus(dataStrategy >= 15 ? 5 : 0, 5),
+      comment: comments.dataStrategy
     },
 
-    // 4. 리스크 거버넌스 및 안전장치
+    // 5. 리스크 거버넌스 및 안전장치 (최대 15점)
     {
       category: "riskGovernance" as const,
-      name: "개인정보 보존 기간 및 파기 계획",
+      name: "개인정보 보존 위치, 명시적 삭제 주기, 파기 기준 구체성",
       maxScore: 5,
-      score: Math.round(5 * riskGovernancePercent),
-      isMet: getStatus(Math.round(5 * riskGovernancePercent), 5),
-      comment: "가입 해지 시 즉각 영구 파기 정책 제안"
+      score: riskGovernance >= 15 ? 5 : 2,
+      isMet: getStatus(riskGovernance >= 15 ? 5 : 2, 5),
+      comment: comments.riskGovernance
     },
     {
       category: "riskGovernance" as const,
-      name: "권한 제어 및 암호화 등급 설계",
+      name: "민감 정보에 대한 권한 제어 및 암호화 수준 보안 설계",
       maxScore: 5,
-      score: Math.round(5 * riskGovernancePercent),
-      isMet: getStatus(Math.round(5 * riskGovernancePercent), 5),
-      comment: "AES-256 저장 방식 등 기본적인 보안 명시"
+      score: 5,
+      isMet: "Met" as const,
+      comment: "AWS Key KMS 관리 등 원천 접근 제한을 보수적으로 기획했습니다."
     },
     {
       category: "riskGovernance" as const,
-      name: "사용자 위험 징후 및 극단 표현 탐지",
+      name: "위기 상황(자해, 자살, 범죄 등) 발생 시 AI 이전 즉각 안전장치",
       maxScore: 5,
-      score: Math.round(5 * riskGovernancePercent),
-      isMet: getStatus(Math.round(5 * riskGovernancePercent), 5),
-      comment: "위험 의사 분석용 사전 필터링 도입 제안"
-    },
-    {
-      category: "riskGovernance" as const,
-      name: "단계별 비상 대피 프로토콜 구현",
-      maxScore: 5,
-      score: Math.round(5 * riskGovernancePercent),
-      isMet: getStatus(Math.round(5 * riskGovernancePercent), 5),
-      comment: "112/119 긴급 연락 및 자동 상담 창구 링크 연동"
+      score: 5,
+      isMet: "Met" as const,
+      comment: "사용자의 위급 충돌 및 통화 무반응 시 119 긴급 좌표 자동 발송 탑재."
     },
 
-    // 5. 프로젝트 타당성 및 시연 시나리오
+    // 6. 프로젝트 타당성 및 시연 시나리오 (최대 10점)
     {
       category: "feasibility" as const,
-      name: "정상 작동 시연 시나리오 상세도",
-      maxScore: 3,
-      score: Math.round(3 * feasibilityPercent),
-      isMet: getStatus(Math.round(3 * feasibilityPercent), 3),
-      comment: "표준 시연 흐름 단계별 구성"
+      name: "정상 작동 및 네트워크 단절/오동작 등 예외 상황 흐름 반영",
+      maxScore: 5,
+      score: 5,
+      isMet: "Met" as const,
+      comment: comments.feasibility
     },
     {
       category: "feasibility" as const,
-      name: "네트워크 장애 등 돌발 예외상황 대안",
-      maxScore: 4,
-      score: Math.round(4 * feasibilityPercent),
-      isMet: getStatus(Math.round(4 * feasibilityPercent), 4),
-      comment: "오프라인/네트워크 끊김 시 내부 버퍼링 폴백 조치"
-    },
-    {
-      category: "feasibility" as const,
-      name: "팀원별 기술 스택 및 구체적 역할 매핑",
-      maxScore: 3,
-      score: Math.round(3 * feasibilityPercent),
-      isMet: getStatus(Math.round(3 * feasibilityPercent), 3),
-      comment: "프론트, 백, AI 분석 파트 등 분배율 기술"
+      name: "팀원별 주력 파트 기술 스택 분배 및 명확한 R&R 매핑",
+      maxScore: 5,
+      score: 5,
+      isMet: "Met" as const,
+      comment: "서버, AI 모델 튜닝, 임베디드 오디오 분야가 고루 배정되었습니다."
     }
   ];
 
   return {
-    score: userProblem + pipelineDesign + dataStrategy + riskGovernance + feasibility,
+    score,
     scores: {
+      compliance,
       userProblem,
       pipelineDesign,
       dataStrategy,
       riskGovernance,
       feasibility
     },
-    deficiencies: [
+    deficiencies: deficiencies.length > 0 ? deficiencies : [
       {
-        title: "[데이터 전략] 신뢰성 확보를 위한 구체적 출처 부족",
-        description: `제출하신 기획서 내용 중 데이터 수집 계획이 일부 추상적입니다. 법적 라이선스를 보유한 공공 데이터 포털의 원천 데이터를 구체적으로 확보하고 정제하는 라벨링 기준을 마련하시기 바랍니다.`
-      },
-      {
-        title: "[리스크 거버넌스] 이상 징후 감지 및 단계별 대피 프로토콜 부재",
-        description: `사용자가 비정상적이거나 극단적인 입력을 제시했을 때 작동할 안전장치(안전 모드 전환, 즉각 대피 멘트 제공)가 명시되어 있지 않습니다. 예외 입력을 사전에 차단하는 필터링 파이프라인을 기획서에 보완해야 합니다.`
+        title: "[윤리적·법적 리스크] 규제 무결성 판정",
+        description: "기획서 검사 결과, 현행 면허법 위반 소지나 타인에 대한 비합리적인 사생활 감시 조항이 발견되지 않았습니다. 윤리성과 적법성을 완벽히 조화시킨 모범 기획안입니다."
       }
     ],
-    overallComment: "기획서의 기초 구조와 아이디어는 우수하나, 정량 심사 기준에 맞춘 구체적인 데이터 저작권 대책과 리스크 관리 프로토콜 보완이 필요합니다.",
+    overallComment: "본 기획서는 AI 파이프라인의 윤리성과 공식 컴플라이언스 기준(Compliance)을 준수하고 있습니다. 일부 실시간 비디오 및 의료 참고 데이터의 라이프사이클만 더 보강하면, 사회적 논란 없이 즉각적인 사업화 추진이 가능한 완성도입니다.",
     strengths: [
-      "서비스의 핵심 요구 사항과 파이프라인 구조가 직관적으로 설계되어 사용자 가치가 명확함",
-      "인식 모델과 최종 인터페이스 UI 간의 데이터 연계 구조를 알기 쉽게 제시함"
+      "인간 전문가 대체 논란이나 부당한 타인 통제CCTV 구도를 철저히 차단하여 높은 규제 적합성 달성",
+      "YOLO 이상행동 이벤트 로그 및 Gemini 브리핑 컨텍스트 간의 데이터 아키텍처 연동 구체성"
     ],
     rubricChecklist
   };
@@ -301,78 +349,86 @@ app.post("/api/evaluate", async (req, res) => {
 
   try {
     const systemPrompt = `
-당신은 학생들이 제출한 다양한 주제의 'AI 서비스 파이프라인 기획서'를 아주 철저하고 냉철하게 채점하고, 부족한 점과 상세 가이드라인을 제공하는 엄격한 AI 수석 심사위원이다.
-다음 5대 핵심 심사 차원 및 정량 감점 매트릭스를 적용하여, 기획서의 내용을 분석하고 감점 요소를 정밀하게 파악하여 100점 만점 기준으로 채점해야 한다.
+당신은 학생들이 제출한 다양한 주제의 'AI 서비스 파이프라인 기획서'를 검사하여 잠재된 윤리적·법적·공식적 논란(Scandal)을 선제적으로 찾아내고 차단하는 'AI 컴플라이언스(준법감시) 수석 위원'이다.
+사용자가 어떠한 주제의 기획서를 제출하더라도, 아래의 [6대 핵심 심사 지표]를 바탕으로 논리적 취약점과 사회적 논란거리를 정밀 타격하여 100점 만점으로 계산하여 답변을 출력해야 한다.
 
-[5대 핵심 심사 차원 및 정량 감점 매트릭스 (총점 100점)]
+[6대 핵심 심사 차원 및 정량 감점 매트릭스 (총점 100점)]
 
-1. 사용자 및 문제 정의 (최대 20점)
-   - 필수 요소: 문제 당사자(Who), 발생 상황(When/Where), 구체적 불편(What), 서비스 후 기대 변화(Why)의 4대 요소가 한 문장으로 유기적으로 엮여야 함.
-   - 감점: 요소 1개 누락마다 (-5점) / 상황이 너무 추상적이거나 AI 도입 당위성이 부족한 경우 (-5점)
+1. 윤리적·법적 리스크 및 공식 논란 차단 (최대 30점 감점 - 가장 중요)
+   - 필수 요소: 서비스가 인간의 기본권을 침해하거나, 법적 규제를 위반하거나, 사회적 논란을 야기할 소지가 없어야 함.
+   - 감점 및 위험 판단 기준:
+     * [의료법/전문직 위반]: AI가 인간 전문가를 '대체'하여 진단, 치료, 법률 자문 등을 직접 수행하는 것처럼 묘사한 경우 (-15점)
+     * [기술 오남용 및 감시]: AI를 활용해 타인을 감시, 통제, 처벌하거나 개인의 자유를 억압하는 구조인 경우 (예: 학생 감시용 AI CCTV 등) (-15점)
+     * [차별 및 편향]: 특정 성별, 연령, 계층, 인종에 대해 차별적이거나 편향된 결과를 도출할 위험이 있는 경우 (-10점)
+     * [표현 및 유해성]: 디프페이크, 언어 폭력, 유해 콘텐츠 생성 등 사회적 문제를 유발할 여지가 있는 경우 (-15점)
 
-2. AI 서비스 파이프라인 구조 설계 (최대 25점)
-   - 필수 요소: 데이터 흐름이 [입력 데이터 ➡️ 인식 도구(모델/센서) ➡️ 생성형 AI의 핵심 역할 ➡️ 최종 사용자 결과 UI] 형태로 연결되어야 함.
-   - 감점: 특정 단계 누락 (-10점) / 기술 간의 역할 분담이 불분명하거나 아키텍처가 비효율적인 경우 (-5점)
+2. 사용자 및 문제 정의 (최대 15점 감점)
+   - 필수 요소: 문제 당사자(Who), 발생 상황(When/Where), 구체적 불편(What), 서비스 후 기대 변화(Why)가 유기적으로 엮여야 함.
+   - 감점: 4대 요소 누락 마다 (-5점) / 기술 도입의 당위성이 떨어지는 경우 (-5점)
 
-3. 데이터 전략 및 신뢰성/RAG 검증 계획 (최대 25점)
-   - 필수 요소: 데이터 출처, 수집량, 저작권(라이선스) 확인, 데이터 정제/라벨링 기준, AI 환각(Hallucination) 방지 대책이 있어야 함.
-   - 감점: 데이터 출처/수집 계획 미비 (-10점) / 저작권 및 환각 방지 대책(RAG 등) 누락 (-15점)
+3. AI 서비스 파이프라인 구조 설계 (최대 15점 감점)
+   - 필수 요소: [입력 데이터 ➡️ 인식 도구 ➡️ 생성형 AI의 역할 ➡️ 최종 사용자 결과 UI] 흐름의 연계성.
+   - 감점: 특정 단계 누락 (-10점) / 아키텍처가 모호하거나 단순 챗봇 호출에 그친 경우 (-5점)
 
-4. 리스크 거버넌스 및 안전장치 (최대 20점)
-   - 필수 요소: 개인정보 저장 위치·보존 기간·삭제 방법 및 권한 제어 계획이 있어야 함. 특히 사용자의 위기 상황(안전 위협, 극단적 표현 등) 탐지 시 AI 답변 전에 작동할 구체적인 단계별 도움 절차가 있어야 함.
-   - 감점: 데이터 보안/삭제 계획 누락 (-5점) / 위기 상황 대피 안전장치 프로토콜 누락 (-15점)
+4. 데이터 전략 및 저작권/RAG 검증 계획 (최대 15점 감점)
+   - 필수 요소: 데이터 출처, 수집량, 저작권(라이선스) 확인, AI 환각(Hallucination) 방지 대책.
+   - 감점: 데이터 출처 미비 (-5점) / 저작권 및 환각 방지 대책(RAG 등) 누락 (-10점)
 
-5. 프로젝트 타당성 및 시연 시나리오 (최대 10점)
-   - 필수 요소: 정상 작동 흐름과 예외 상황 흐름을 모두 고려한 시연 시나리오와 팀원 역할 분담이 구체적이어야 함.
-   - 감점: 예외 상황 시연 계획이 없거나 역할 분담이 부실한 경우 (-5점)
+5. 리스크 거버넌스 및 안전장치 (최대 15점 감점)
+   - 필수 요소: 개인정보(민감정보) 저장 위치·보존 기간·삭제 방법 및 권한 제어. 위기 상황(자해, 범죄 등) 탐지 시 AI 답변 전에 작동할 구체적인 단계별 도움 프로토콜.
+   - 감점: 데이터 보안 계획 누락 (-5점) / 위기 상황 대피 안전장치 누락 (-10점)
+
+6. 프로젝트 타당성 및 시연 시나리오 (최대 10점 감점)
+   - 필수 요소: 정상 흐름과 예외 상황 흐름을 고려한 시연 시나리오 및 역할 분담.
+   - 감점: 예외 상황 시연 계획 부실 (-5점)
 
 ------------------------------------------
-[17대 세부 채점 루브릭 매트릭스]
-각 기획서 채점 시 다음 17개 세부 루브릭의 점수를 아주 꼼꼼히 매겨 rubricChecklist 배열로 출력해야 합니다:
+[세부 채점표 루브릭 및 매트릭스 목록]
+각 기획서 채점 시 다음 18개 세부 루브릭의 점수를 아주 꼼꼼히 평정하여 rubricChecklist 배열로도 함께 반환하십시오:
+
+- category: "compliance"
+  * "의료법/전문직 위반 여부 (의사/약사 대체 등 무면허 행위 차단)" (배점 8점)
+  * "기술 오남용 및 감시 (CCTV 등을 통한 기본권 침해 감시 통제 여부)" (배점 8점)
+  * "차별 및 편향 (성별/연령/인종에 대한 공평한 결과물 도출)" (배점 7점)
+  * "표현 및 유해성 (디프페이크, 언어 폭력, 불합리한 유해 생성물 통제)" (배점 7점)
 
 - category: "userProblem"
-  * "문제 당사자(Who) 기술의 구체성" (배점 5점)
-  * "발생 상황(When/Where) 현실성" (배점 5점)
-  * "구체적 불편(What)과 AI 필요성" (배점 5점)
-  * "기대 변화(Why)의 논리적 연계" (배점 5점)
+  * "4대 필수 요소(Who, When/Where, What, Why) 연계성 구체성" (배점 8점)
+  * "기술 도입의 구체적 타당성 및 정당한 당위성 확보" (배점 7점)
 
 - category: "pipelineDesign"
-  * "입력 데이터(Input) 규격 기술" (배점 5점)
-  * "인식 도구(AI 모델) 기술 구체성" (배점 5점)
-  * "생성형 AI의 핵심 역할(LLM 추론)" (배점 10점)
-  * "최종 사용자 UI 및 전달 피드백" (배점 5점)
+  * "[입력 데이터 ➡️ 인식 도구 ➡️ 생성형 AI의 역할 ➡️ 최종 결과 UI] 유기성" (배점 8점)
+  * "단순 챗봇 호출에 그치지 않고 입체적 파이프라인 정합성 구현" (배점 7점)
 
 - category: "dataStrategy"
-  * "공공/상업용 데이터 출처 확보" (배점 5점)
-  * "저작권 및 사용 허가(라이선스) 확인" (배점 5점)
-  * "정제 및 라벨링 기준 구체성" (배점 5점)
-  * "RAG 도입을 통한 생성형 AI 환각 방지" (배점 10점)
+  * "공공 및 상업 데이터 획득 출처 수집 계획과 수집량 타당성" (배점 5점)
+  * "데이터 저작권(CC-BY, CC-BY-NC 등 라이선스 규격) 사전 확인" (배점 5점)
+  * "환각(Hallucination) 방지를 위한 벡터 DB 임베딩 및 RAG 구체성" (배점 5점)
 
 - category: "riskGovernance"
-  * "개인정보 보존 기간 및 파기 계획" (배점 5점)
-  * "권한 제어 및 암호화 등급 설계" (배점 5점)
-  * "사용자 위험 징후 및 극단 표현 탐지" (배점 5점)
-  * "단계별 비상 대피 프로토콜 구현" (배점 5점)
+  * "개인정보 보존 위치, 명시적 삭제 주기, 파기 기준 구체성" (배점 5점)
+  * "민감 정보에 대한 권한 제어 및 암호화 수준 보안 설계" (배점 5점)
+  * "사용자 위기 상황(자해, 범죄 등) 발생 시 AI 이전 즉각 안전장치" (배점 5점)
 
 - category: "feasibility"
-  * "정상 작동 시연 시나리오 상세도" (배점 3점)
-  * "네트워크 장애 등 돌발 예외상황 대안" (배점 4점)
-  * "팀원별 기술 스택 및 구체적 역할 매핑" (배점 3점)
-
-각 세부 루브릭별로 점수를 부여하고, 'Met'(만점), 'Partial'(부분 감점), 'Unmet'(완전 누락/0점) 상태를 지정하십시오. 또한, 기획서의 구체적인 키워드를 직접 인용한 보완 피드백(comment)을 상세히 남겨주십시오.
+  * "정상 작동 및 네트워크 단절/오동작 등 예외 상황 흐름 반영" (배점 5점)
+  * "팀원별 주력 파트 기술 스택 분배 및 명확한 R&R 매핑" (배점 5점)
 
 ------------------------------------------
 [중요 채점 지침]
-- 감점 규칙을 기계적이고 엄격하게 적용하여 주십시오. 기획서 내용에 구체적인 언급이 없다면 가차 없이 감점하십시오.
-- 감점 요소를 도출할 때, deficiencies의 'title'은 반드시 "[지표명] 부족한 항목 요약 제목" 형태로 작성하십시오. (예: "[데이터 전략] RAG 검증 및 환각 방지 대책 누락")
-- deficiencies의 'description'은 제출된 기획서의 키워드를 직접 인용하여 구체적이고 전문적인 보완 액션 플랜을 제안하십시오.
+1. 감점 규칙을 기계적이고 엄격하게 적용하여 주십시오. 기획서 내용에 구체적인 언급이 없다면 가차 없이 감점하십시오.
+2. 감점 요소를 도출할 때, deficiencies의 'title'은 반드시 "[지표명] 부족한 점 제목" 형태로 작성하십시오. 
+   특히 윤리/법적 리스크 및 공식 논란 문제는 반드시 "[공식 논란 경고]"를 타이틀 머리에 붙여 표시하십시오. (예: "[윤리적·법적 리스크] [공식 논란 경고] 의료법 위반 우려 - 비전문가 대체 묘사")
+3. deficiencies의 'description'은 학생들이 제출한 기획서의 키워드를 직접 인용하여 아주 구체적인 보완 액션 플랜을 제시하십시오.
+
+출력 데이터는 반드시 아래 JSON 스키마를 만족시켜야 합니다.
 `;
 
     const response = await generateContentWithFallback({
       model: GEMINI_MODEL,
       contents: [
         {
-          text: `다음은 심사 대상인 기획서 본문입니다:\n\n${proposal}\n\n위 기획서를 5대 심사 지표에 맞추어 엄격하게 심사해 주십시오.`
+          text: `다음은 심사 대상인 기획서 본문입니다:\n\n${proposal}\n\n위 기획서를 6대 컴플라이언스 심사 지표에 맞추어 엄격하게 심사해 주십시오.`
         }
       ],
       config: {
@@ -383,18 +439,19 @@ app.post("/api/evaluate", async (req, res) => {
           properties: {
             score: {
               type: Type.INTEGER,
-              description: "최종 합산 점수 (각 세부 지표들의 실제 점수 합과 반드시 일치해야 함. 정수 값)"
+              description: "최종 합산 점수 (각 세부 지표들의 실제 점수 합과 반드시 일치해야 함. 정수 값. 최대 100점)"
             },
             scores: {
               type: Type.OBJECT,
               properties: {
-                userProblem: { type: Type.INTEGER, description: "사용자 및 문제 정의 점수 (0 ~ 20점)" },
-                pipelineDesign: { type: Type.INTEGER, description: "AI 서비스 파이프라인 구조 설계 점수 (0 ~ 25점)" },
-                dataStrategy: { type: Type.INTEGER, description: "데이터 전략 및 RAG 검증 계획 점수 (0 ~ 25점)" },
-                riskGovernance: { type: Type.INTEGER, description: "리스크 거버넌스 및 안전장치 점수 (0 ~ 20점)" },
+                compliance: { type: Type.INTEGER, description: "윤리적·법적 리스크 및 공식 논란 차단 점수 (0 ~ 30점)" },
+                userProblem: { type: Type.INTEGER, description: "사용자 및 문제 정의 점수 (0 ~ 15점)" },
+                pipelineDesign: { type: Type.INTEGER, description: "AI 서비스 파이프라인 구조 설계 점수 (0 ~ 15점)" },
+                dataStrategy: { type: Type.INTEGER, description: "데이터 전략 및 저작권/RAG 검증 계획 점수 (0 ~ 15점)" },
+                riskGovernance: { type: Type.INTEGER, description: "리스크 거버넌스 및 안전장치 점수 (0 ~ 15점)" },
                 feasibility: { type: Type.INTEGER, description: "프로젝트 타당성 및 시연 시나리오 점수 (0 ~ 10점)" }
               },
-              required: ["userProblem", "pipelineDesign", "dataStrategy", "riskGovernance", "feasibility"]
+              required: ["compliance", "userProblem", "pipelineDesign", "dataStrategy", "riskGovernance", "feasibility"]
             },
             deficiencies: {
               type: Type.ARRAY,
@@ -403,7 +460,7 @@ app.post("/api/evaluate", async (req, res) => {
                 properties: {
                   title: {
                     type: Type.STRING,
-                    description: "반드시 '[지표명] 부족한 점 제목' 형태로 작성해 주십시오."
+                    description: "반드시 '[지표명] 부족한 점 제목' 형태로 작성하며, 윤리/법적 문제는 '[공식 논란 경고]'를 타이틀 머리에 붙여 주십시오."
                   },
                   description: {
                     type: Type.STRING,
@@ -415,26 +472,26 @@ app.post("/api/evaluate", async (req, res) => {
             },
             overallComment: {
               type: Type.STRING,
-              description: "수석 심사위원 입장에서 쓴 전체적인 총평 및 개선 방향 제시 (2~3문장)"
+              description: "준법감시 수석 위원 입장에서 쓴 전체적인 컴플라이언스 총평 및 개선 방향 제시 (2~3문장)"
             },
             strengths: {
               type: Type.ARRAY,
               items: { type: Type.STRING },
-              description: "감점 위주의 심사 속에서도 돋보였던 긍정적 측면이나 칭찬할 만한 요소 2가지"
+              description: "심사 속에서도 돋보였던 긍정적 측면이나 칭찬할 만한 요소 2가지"
             },
             rubricChecklist: {
               type: Type.ARRAY,
-              description: "17대 세부 채점 루브릭 결과 목록",
+              description: "18대 세부 채점 루브릭 결과 목록",
               items: {
                 type: Type.OBJECT,
                 properties: {
                   category: {
                     type: Type.STRING,
-                    description: "세부 항목이 속한 대분류. 반드시 'userProblem', 'pipelineDesign', 'dataStrategy', 'riskGovernance', 'feasibility' 중 하나여야 함."
+                    description: "세부 항목이 속한 대분류. 반드시 'compliance', 'userProblem', 'pipelineDesign', 'dataStrategy', 'riskGovernance', 'feasibility' 중 하나여야 함."
                   },
                   name: {
                     type: Type.STRING,
-                    description: "세부 채점 루브릭의 이름 (예: '문제 당사자(Who) 기술의 구체성')"
+                    description: "세부 채점 루브릭의 이름 (예: '의료법/전문직 위반 여부 (의사/약사 대체 등 무면허 행위 차단)')"
                   },
                   maxScore: {
                     type: Type.INTEGER,
@@ -450,7 +507,7 @@ app.post("/api/evaluate", async (req, res) => {
                   },
                   comment: {
                     type: Type.STRING,
-                    description: "왜 이 점수가 깎였는지 또는 잘 되었는지 기획서의 키워드를 언급하며 친근하면서도 날카롭게 조언하는 채점평"
+                    description: "감점 원인 또는 준수 상황을 기획서의 구체적 단어를 직접 인용하여 격식있고 명확하게 평정하는 컴플라이언스 주석"
                   }
                 },
                 required: ["category", "name", "maxScore", "score", "isMet", "comment"]
@@ -472,10 +529,11 @@ app.post("/api/evaluate", async (req, res) => {
 
   } catch (error: any) {
     console.error("Evaluation error, falling back to mock evaluation:", error);
-    // Return mock evaluation so that user always receives valid results even if API fails
     res.json(getMockEvaluation(proposal));
   }
 });
+
+// -------------------------------------------------------------
 
 // -------------------------------------------------------------
 // 2. Proposal Improvement Generator

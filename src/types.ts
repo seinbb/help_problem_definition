@@ -1,9 +1,10 @@
 export interface Scores {
-  userProblem: number;      // max 20
-  pipelineDesign: number;   // max 25
-  dataStrategy: number;     // max 25
-  riskGovernance: number;   // max 20
-  feasibility: number;      // max 10
+  compliance: number;      // max 30
+  userProblem: number;     // max 15
+  pipelineDesign: number;  // max 15
+  dataStrategy: number;    // max 15
+  riskGovernance: number;  // max 15
+  feasibility: number;     // max 10
 }
 
 export interface Deficiency {
@@ -12,7 +13,7 @@ export interface Deficiency {
 }
 
 export interface RubricCheckItem {
-  category: "userProblem" | "pipelineDesign" | "dataStrategy" | "riskGovernance" | "feasibility";
+  category: "compliance" | "userProblem" | "pipelineDesign" | "dataStrategy" | "riskGovernance" | "feasibility";
   name: string;
   maxScore: number;
   score: number;

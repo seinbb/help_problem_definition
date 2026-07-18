@@ -1,6 +1,6 @@
 {
-  "name": "AI 서비스 파이프라인 심사 시스템",
-  "description": "학생들이 제출한 AI 서비스 파이프라인 기획서를 5대 핵심 심사 차원에 따라 엄격하게 심사하고, 감점 요소 분석과 상세한 보완 가이드라인을 제공하는 AI 수석 심사위원 시스템입니다.",
+  "name": "AI 컴플라이언스 준법감시 시스템",
+  "description": "학생들이 제출한 AI 서비스 파이프라인 기획서 내에 잠재된 윤리적·법적·공식적 논란(Scandal)을 선제적으로 감지하고, 6대 핵심 심사 지표에 기반한 정량 감점 및 보완 액션 플랜을 제시하는 AI 컴플라이언스(준법감시) 수석 위원 시스템입니다.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

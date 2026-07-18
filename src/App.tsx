@@ -12,6 +12,7 @@ import {
   ArrowRight, 
   Lock, 
   ShieldAlert, 
+  Shield,
   Users, 
   Database, 
   HelpCircle, 
@@ -328,20 +329,20 @@ export default function App() {
       <header className="bg-slate-900 text-white px-6 py-4.5 sticky top-0 z-40 border-b border-slate-800/60 shadow-sm">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-pulse shadow-sm shadow-indigo-500/50"></div>
+            <div className="w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse shadow-sm shadow-rose-500/50"></div>
             <div>
               <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-2">
-                AI Senior Judge <span className="text-xs font-mono font-normal text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-md">Protocol v4.0</span>
+                AI 컴플라이언스 준법감시 시스템 <span className="text-xs font-mono font-normal text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-md">Scandal Blocker v4.0</span>
               </h1>
               <p className="text-xs text-slate-400 mt-1">
-                5대 핵심 심사 차원 기반의 정교한 AI 서비스 파이프라인 심사 및 실시간 맞춤형 코칭
+                6대 핵심 심사 지표에 기반한 정량 감점 매트릭스 적용 및 실시간 리스크 보완 코칭 (준법감시 수석 위원)
               </p>
             </div>
           </div>
           
           <div className="flex items-center gap-2 bg-slate-800/60 p-1.5 rounded-lg text-xs border border-slate-700/50">
-            <span className="px-2 py-0.5 bg-slate-950 text-indigo-400 font-mono font-semibold rounded-md">
-              GEMINI 3.5 FLASH
+            <span className="px-2 py-0.5 bg-slate-950 text-rose-400 font-mono font-semibold rounded-md">
+              COMPLIANCE GUARD
             </span>
             <span className="px-1 text-[10px] font-mono uppercase tracking-wider text-slate-300 font-bold">RIGOROUS_MODE</span>
           </div>
@@ -442,13 +443,14 @@ export default function App() {
                 placeholder={`여기에 학생들이 작성한 'AI 서비스 파이프라인 기획서'를 자유롭게 입력하거나 붙여넣어 주세요.
                 
 [기획서 핵심 권장 항목]
-1. 사용자 및 문제 정의 (Who, When, What, Why)
-2. AI 서비스 파이프라인 구조 설계
-3. 데이터 전략 및 신뢰성/RAG 검증 계획
-4. 리스크 거버넌스 및 안전장치
-5. 프로젝트 타당성 및 시연 시나리오
+1. 윤리적·법적 리스크 예방책 (전문직 면허 준수, 저작권 및 혐오 편향 방지 등)
+2. 사용자 및 문제 정의 (Who, When, What, Why)
+3. AI 서비스 파이프라인 구조 설계 (입력 ➡️ 센서/모델 ➡️ LLM ➡️ UI)
+4. 데이터 전략 및 저작권/RAG 검증 계획
+5. 리스크 거버넌스 및 안전장치 (개인정보 수명주기, 입력 필터링)
+6. 프로젝트 타당성 및 시연 시나리오
 
-위 핵심 항목과 각 세부 요구 조건이 구체적일수록 감점을 우회하고 훌륭한 심사 결과를 얻을 수 있습니다.`}
+위 핵심 항목과 각 세부 요구 조건이 구체적일수록 공식 논란(Scandal) 감점을 우회하고 훌륭한 심사 결과를 얻을 수 있습니다.`}
                 className="w-full flex-1 p-4.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 focus:outline-hidden text-sm leading-relaxed bg-slate-50/30 text-slate-700 disabled:opacity-75 transition-all duration-200 min-h-[300px]"
               />
             </div>
@@ -498,7 +500,7 @@ export default function App() {
                   기획서 심사 진단 프로토콜 실행 중
                 </h3>
                 <p className="text-sm text-slate-500 max-w-sm leading-relaxed">
-                  AI 수석 심사위원단이 5대 핵심 심사 차원과 감점 세부 기준표에 입각하여 학생 제출물 내용을 정밀 검토 중입니다.
+                  AI 컴플라이언스 준법감시 수석 위원이 6대 핵심 심사 지표와 감점 세부 기준표에 입각하여 학생 제출물 내용을 정밀 검토 중입니다.
                 </p>
               </div>
               
@@ -517,59 +519,67 @@ export default function App() {
             <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200/50 shadow-xs flex flex-col justify-between min-h-[550px] space-y-6">
               <div className="space-y-6">
                 <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100">
-                  <Award className="w-6 h-6 text-indigo-600" />
-                  <h3 className="text-base font-bold text-slate-800">AI 수석 심사위원 5대 평가 모델 및 감점 기준 가이드</h3>
+                  <Award className="w-6 h-6 text-rose-600" />
+                  <h3 className="text-base font-bold text-slate-800">AI 컴플라이언스 준법감시 6대 평가 지표 및 감점 기준 가이드</h3>
                 </div>
                 
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  본 심사 시스템은 교육부 산하 평가 가이드라인과 실무 AI 설계 프로토콜에 의거한 5대 핵심 지표를 심사에 반영합니다. 각 항목별로 필수 요건이 결여되어 있는 경우 감점 매트릭스에 따른 세부 감점이 가차 없이 누적되니 유의하여 주십시오.
+                  본 심사 시스템은 인공지능 윤리 기준 및 준법감시 가이드라인에 의거한 6대 핵심 지표를 심사에 반영합니다. 윤리·법적 하자, 전문직 위반, 저작권 침해, 편향 및 환각 등 잠재적 논란(Scandal) 요소 발견 시 강력한 감점 필터링이 적용됩니다.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition-colors border border-slate-100/80 text-sm flex gap-3.5">
-                    <div className="font-bold text-indigo-600 font-mono text-sm shrink-0">01</div>
+                  <div className="p-4 rounded-xl bg-rose-50/30 hover:bg-rose-50/50 transition-colors border border-rose-100/50 text-sm flex gap-3.5">
+                    <div className="font-bold text-rose-600 font-mono text-sm shrink-0">01</div>
                     <div className="space-y-1">
-                      <h4 className="font-bold text-slate-800 text-xs">사용자 및 문제 정의 (20점)</h4>
-                      <p className="text-slate-500 leading-relaxed text-[11px]">문제 당사자(Who), 발생 상황(When/Where), 구체적 불편(What), 기대 변화(Why) 4대 요소의 유기적 연계성. (미흡 요소당 5점 감점)</p>
+                      <h4 className="font-bold text-rose-900 text-xs flex items-center gap-1"><ShieldAlert className="w-3.5 h-3.5 text-rose-500" /> 윤리·법적 리스크 및 공식 논란 차단 (30점)</h4>
+                      <p className="text-slate-500 leading-relaxed text-[11px]">의료법/전문직 면허 위반, 저작권/초상권 침해, 차별/편향, 여론 호도 및 허위 정보 조작 방지 대책. (미비 시 최대 30점 감점)</p>
                     </div>
                   </div>
 
                   <div className="p-4 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition-colors border border-slate-100/80 text-sm flex gap-3.5">
                     <div className="font-bold text-indigo-600 font-mono text-sm shrink-0">02</div>
                     <div className="space-y-1">
-                      <h4 className="font-bold text-slate-800 text-xs">AI 파이프라인 구조 설계 (25점)</h4>
-                      <p className="text-slate-500 leading-relaxed text-[11px]">데이터 흐름이 [입력데이터 ➡️ 인식도구(모델/센서) ➡️ LLM 핵심 역할 ➡️ 최종 UI] 형태로 빈틈없이 구조화되었는지 진단. (핵심 연계 누락 시 10점 감점)</p>
+                      <h4 className="font-bold text-slate-800 text-xs">사용자 및 문제 정의 (15점)</h4>
+                      <p className="text-slate-500 leading-relaxed text-[11px]">문제 당사자(Who), 발생 상황(When/Where), 구체적 불편(What), 기대 변화(Why) 4대 요소의 유기적 연계성. (미흡 요소당 5점 감점)</p>
                     </div>
                   </div>
 
                   <div className="p-4 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition-colors border border-slate-100/80 text-sm flex gap-3.5">
                     <div className="font-bold text-indigo-600 font-mono text-sm shrink-0">03</div>
                     <div className="space-y-1">
-                      <h4 className="font-bold text-slate-800 text-xs">데이터 전략 및 RAG 검증 (25점)</h4>
-                      <p className="text-slate-500 leading-relaxed text-[11px]">적법한 데이터 수집 출처 제시, 라벨링 기준, 그리고 LLM의 환각 현상(Hallucination) 방지를 위한 구체적 RAG 구조 및 프롬프트 검증 대책. (누락 시 최대 15점 감점)</p>
+                      <h4 className="font-bold text-slate-800 text-xs">AI 파이프라인 구조 설계 (15점)</h4>
+                      <p className="text-slate-500 leading-relaxed text-[11px]">데이터 흐름이 [입력데이터 ➡️ 인식도구(모델/센서) ➡️ LLM 핵심 역할 ➡️ 최종 UI] 형태로 빈틈없이 구조화되었는지 진단. (핵심 연계 누락 시 10점 감점)</p>
                     </div>
                   </div>
 
                   <div className="p-4 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition-colors border border-slate-100/80 text-sm flex gap-3.5">
                     <div className="font-bold text-indigo-600 font-mono text-sm shrink-0">04</div>
                     <div className="space-y-1">
-                      <h4 className="font-bold text-slate-800 text-xs">리스크 거버넌스 및 안전장치 (20점)</h4>
-                      <p className="text-slate-500 leading-relaxed text-[11px]">개인정보 라이프사이클 관리안(저장/기간/파기) 및 극단적 상황 혹은 유해한 입력 시 우회하고 경고를 보낼 단계별 안전장치 유무. (안전 프로토콜 미비 시 15점 감점)</p>
+                      <h4 className="font-bold text-slate-800 text-xs">데이터 전략 및 RAG 검증 (15점)</h4>
+                      <p className="text-slate-500 leading-relaxed text-[11px]">적법한 데이터 수집 출처 제시, 저작권 준수, 그리고 LLM의 환각 현상(Hallucination) 방지를 위한 구체적 RAG 구조 및 프롬프트 검증 대책. (누락 시 최대 10점 감점)</p>
                     </div>
                   </div>
-                </div>
 
-                <div className="p-4 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition-colors border border-slate-100/80 text-sm flex gap-3.5">
-                  <div className="font-bold text-indigo-600 font-mono text-sm shrink-0">05</div>
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-slate-800 text-xs">타당성 및 시연 시나리오 (10점)</h4>
-                    <p className="text-slate-500 leading-relaxed text-[11px]">이상 정상 시나리오 구성 여부, 통신 예외 조치 등 구체적인 시연 시나리오와 명확한 역할 분담 비중. (미흡 시 5점 감점)</p>
+                  <div className="p-4 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition-colors border border-slate-100/80 text-sm flex gap-3.5">
+                    <div className="font-bold text-indigo-600 font-mono text-sm shrink-0">05</div>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-slate-800 text-xs">리스크 거버넌스 및 안전장치 (15점)</h4>
+                      <p className="text-slate-500 leading-relaxed text-[11px]">개인정보 라이프사이클 관리안(저장/기간/파기) 및 극단적 상황 혹은 유해한 입력 시 우회하고 경고를 보낼 단계별 안전장치 유무. (안전 프로토콜 미비 시 10점 감점)</p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition-colors border border-slate-100/80 text-sm flex gap-3.5">
+                    <div className="font-bold text-indigo-600 font-mono text-sm shrink-0">06</div>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-slate-800 text-xs">타당성 및 시연 시나리오 (10점)</h4>
+                      <p className="text-slate-500 leading-relaxed text-[11px]">이상 정상 시나리오 구성 여부, 통신 예외 조치 등 구체적인 시연 시나리오와 명확한 역할 분담 비중. (미흡 시 5점 감점)</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div className="border-t border-slate-100 pt-5 mt-4 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4">
-                <span className="flex items-center gap-1.5"><Info className="w-4 h-4 text-slate-400 shrink-0" /> 왼쪽 기획서 템플릿을 선택하거나 직접 입력 후 '평가 시작' 버튼을 눌러주세요.</span>
+                <span className="flex items-center gap-1.5"><Info className="w-4 h-4 text-slate-400 shrink-0" /> 왼쪽 기획서 템플릿을 선택하거나 직접 입력 후 '심사 시작하기' 버튼을 눌러주세요.</span>
                 <span className="font-semibold tracking-wider text-slate-300 font-mono">SYSTEM VER 4.0.2</span>
               </div>
             </div>
@@ -600,7 +610,7 @@ export default function App() {
                     </h2>
                     
                     <p className="text-sm text-slate-500 leading-relaxed max-w-md">
-                      본 결과는 제출된 AI 기획서를 5대 정량 지표와 세부 감점 매트릭스에 따라 아주 정밀하게 분석하여 평정된 최종 정량 리포트입니다.
+                      본 결과는 제출된 AI 기획서를 6대 핵심 심사 지표와 세부 감점 매트릭스에 따라 아주 정밀하게 분석하여 평정된 최종 준법감시 보고서입니다.
                     </p>
                   </div>
 
@@ -657,7 +667,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* 5 Dimensions Segment Breakdown Grid */}
+              {/* 6 Dimensions Segment Breakdown Grid */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200/50 shadow-sm space-y-5">
                 <h3 className="text-xs font-bold font-mono uppercase tracking-wider text-slate-400 flex items-center gap-2 pb-2 border-b border-slate-100">
                   <BrainCircuit className="w-4 h-4 text-indigo-500" /> METRIC SCORE BREAKDOWN
@@ -667,13 +677,13 @@ export default function App() {
                   {/* D1 */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-slate-700 font-medium text-xs">
-                      <span>[01] 사용자 및 문제 정의 (Who, When, What, Why)</span>
-                      <span className="font-semibold text-slate-900">{result.scores.userProblem} / 20점</span>
+                      <span className="flex items-center gap-1 text-rose-600 font-semibold"><ShieldAlert className="w-3.5 h-3.5 text-rose-500 shrink-0" /> [01] 윤리·법적 리스크 및 공식 논란 차단 (Scandal Blocker)</span>
+                      <span className="font-semibold text-slate-900">{result.scores.compliance} / 30점</span>
                     </div>
                     <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-indigo-600 rounded-full transition-all duration-500"
-                        style={{ width: `${(result.scores.userProblem / 20) * 100}%` }}
+                        className="h-full bg-rose-500 rounded-full transition-all duration-500"
+                        style={{ width: `${(result.scores.compliance / 30) * 100}%` }}
                       />
                     </div>
                   </div>
@@ -681,13 +691,13 @@ export default function App() {
                   {/* D2 */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-slate-700 font-medium text-xs">
-                      <span>[02] AI 서비스 파이프라인 구조 설계</span>
-                      <span className="font-semibold text-slate-900">{result.scores.pipelineDesign} / 25점</span>
+                      <span>[02] 사용자 및 문제 정의 (Who, When, What, Why)</span>
+                      <span className="font-semibold text-slate-900">{result.scores.userProblem} / 15점</span>
                     </div>
                     <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-indigo-600 rounded-full transition-all duration-500"
-                        style={{ width: `${(result.scores.pipelineDesign / 25) * 100}%` }}
+                        style={{ width: `${(result.scores.userProblem / 15) * 100}%` }}
                       />
                     </div>
                   </div>
@@ -695,13 +705,13 @@ export default function App() {
                   {/* D3 */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-slate-700 font-medium text-xs">
-                      <span>[03] 데이터 전략 및 신뢰성/RAG 검증 계획</span>
-                      <span className="font-semibold text-slate-900">{result.scores.dataStrategy} / 25점</span>
+                      <span>[03] AI 서비스 파이프라인 구조 설계</span>
+                      <span className="font-semibold text-slate-900">{result.scores.pipelineDesign} / 15점</span>
                     </div>
                     <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-indigo-600 rounded-full transition-all duration-500"
-                        style={{ width: `${(result.scores.dataStrategy / 25) * 100}%` }}
+                        style={{ width: `${(result.scores.pipelineDesign / 15) * 100}%` }}
                       />
                     </div>
                   </div>
@@ -709,13 +719,13 @@ export default function App() {
                   {/* D4 */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-slate-700 font-medium text-xs">
-                      <span>[04] 리스크 거버넌스 및 안전장치</span>
-                      <span className="font-semibold text-slate-900">{result.scores.riskGovernance} / 20점</span>
+                      <span>[04] 데이터 전략 및 저작권/RAG 검증 계획</span>
+                      <span className="font-semibold text-slate-900">{result.scores.dataStrategy} / 15점</span>
                     </div>
                     <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-indigo-600 rounded-full transition-all duration-500"
-                        style={{ width: `${(result.scores.riskGovernance / 20) * 100}%` }}
+                        style={{ width: `${(result.scores.dataStrategy / 15) * 100}%` }}
                       />
                     </div>
                   </div>
@@ -723,7 +733,21 @@ export default function App() {
                   {/* D5 */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-slate-700 font-medium text-xs">
-                      <span>[05] 프로젝트 타당성 및 시연 시나리오</span>
+                      <span>[05] 리스크 거버넌스 및 안전장치</span>
+                      <span className="font-semibold text-slate-900">{result.scores.riskGovernance} / 15점</span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+                        style={{ width: `${(result.scores.riskGovernance / 15) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* D6 */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-slate-700 font-medium text-xs">
+                      <span>[06] 프로젝트 타당성 및 시연 시나리오</span>
                       <span className="font-semibold text-slate-900">{result.scores.feasibility} / 10점</span>
                     </div>
                     <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -736,12 +760,12 @@ export default function App() {
                 </div>
               </div>
 
-              {/* 17대 세부 채점표 (17-Point Granular Checklist) */}
+              {/* 18대 세부 채점표 (18-Point Granular Checklist) */}
               {result.rubricChecklist && result.rubricChecklist.length > 0 && (
                 <div className="bg-white p-6 rounded-2xl border border-slate-200/50 shadow-sm space-y-4">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                     <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-600" /> 17대 세부 루브릭 채점표 (Granular Checklist)
+                      <Check className="w-4 h-4 text-emerald-600" /> 18대 세부 루브릭 채점표 (Granular Checklist)
                     </h3>
                     <span className="text-[10px] bg-rose-50 text-rose-600 font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider border border-rose-100">STRICT_MODE</span>
                   </div>
@@ -752,11 +776,12 @@ export default function App() {
 
                   <div className="space-y-4 pt-1">
                     {[
-                      { key: "userProblem", label: "01. 사용자 및 문제 정의", icon: Users },
-                      { key: "pipelineDesign", label: "02. AI 서비스 파이프라인 구조 설계", icon: BrainCircuit },
-                      { key: "dataStrategy", label: "03. 데이터 전략 및 RAG 검증 계획", icon: Database },
-                      { key: "riskGovernance", label: "04. 리스크 거버넌스 및 안전장치", icon: ShieldAlert },
-                      { key: "feasibility", label: "05. 프로젝트 타당성 및 시연 시나리오", icon: Award }
+                      { key: "compliance", label: "01. 윤리적·법적 리스크 및 공식 논란 차단 (Scandal Blocker)", icon: ShieldAlert },
+                      { key: "userProblem", label: "02. 사용자 및 문제 정의", icon: Users },
+                      { key: "pipelineDesign", label: "03. AI 서비스 파이프라인 구조 설계", icon: BrainCircuit },
+                      { key: "dataStrategy", label: "04. 데이터 전략 및 저작권/RAG 검증 계획", icon: Database },
+                      { key: "riskGovernance", label: "05. 리스크 거버넌스 및 안전장치", icon: Shield },
+                      { key: "feasibility", label: "06. 프로젝트 타당성 및 시연 시나리오", icon: Award }
                     ].map((catGroup) => {
                       const items = result.rubricChecklist!.filter(item => item.category === catGroup.key);
                       const IconComponent = catGroup.icon;
