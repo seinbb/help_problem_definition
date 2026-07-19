@@ -13,12 +13,20 @@ const PORT = 3000;
 app.use(express.json());
 
 // Preferred Model Name
-const GEMINI_MODEL = "gemini-3.5-flash";
+const GEMINI_MODEL = "gemma-4-26b";
 
 // Initialize Gemini SDK with telemetry header
 const apiKey = process.env.GEMINI_API_KEY;
 
-const ai = (apiKey && apiKey !== "MY_GEMINI_API_KEY" && apiKey.trim() !== "") ? new GoogleGenAI({
+const isKeyConfigured = !!(apiKey && apiKey !== "MY_GEMINI_API_KEY" && apiKey.trim() !== "");
+console.log(`[Gemini API Config] Checking API Key...`);
+if (isKeyConfigured) {
+  console.log(`[Gemini API Config] GEMINI_API_KEY is configured (Length: ${apiKey!.length}). Initializing SDK.`);
+} else {
+  console.log(`[Gemini API Config] GEMINI_API_KEY is NOT configured or has default placeholder. Fallback mode active.`);
+}
+
+const ai = isKeyConfigured ? new GoogleGenAI({
   apiKey: apiKey,
   httpOptions: {
     headers: {
@@ -37,14 +45,23 @@ async function generateContentWithFallback(options: {
     throw new Error("Gemini API is not initialized. Please configure GEMINI_API_KEY in Secrets.");
   }
 
-  const primaryModel = options.model === "gemma-4-26b" ? GEMINI_MODEL : options.model;
+  const primaryModel = options.model;
   
   // List of models to try in order
-  const modelsToTry = [primaryModel, "gemini-3.5-flash"];
+  const modelsToTry = [
+    primaryModel,
+    "gemini-3.5-flash",
+    "gemini-2.5-flash",
+    "gemini-3.1-flash-lite",
+    "gemini-flash-latest"
+  ];
+
+  // Remove duplicates while preserving insertion order
+  const uniqueModels = Array.from(new Set(modelsToTry));
 
   let lastError: any = null;
 
-  for (const modelName of modelsToTry) {
+  for (const modelName of uniqueModels) {
     try {
       console.log(`[Gemini API] Attempting call with model: ${modelName}`);
       const response = await ai.models.generateContent({
@@ -53,11 +70,17 @@ async function generateContentWithFallback(options: {
       });
       return response;
     } catch (err: any) {
-      console.warn(`[Gemini API Warn] Call with model ${modelName} failed: ${err.message}`);
+      console.warn(`[Gemini API Warn] Call with model ${modelName} failed: ${err.message || err}`);
       lastError = err;
-      // If it is an authorization/permission error, there is no point in trying other models
+      
+      // If we got an auth/permission error, check if it's model-specific.
+      // E.g. gemini-3.5-flash might be blocked, but gemini-2.5-flash is allowed.
+      // However, if standard models like gemini-2.5-flash also get 403/401, the key itself is likely invalid, so we break.
       if (err.message && (err.message.includes("403") || err.message.includes("PERMISSION_DENIED") || err.message.includes("401"))) {
-        break;
+        if (modelName === "gemini-2.5-flash" || modelName === "gemini-3.1-flash-lite" || modelName === "gemini-flash-latest") {
+          console.warn("[Gemini API] Auth/Permission error on standard fallback model. Breaking fallback chain.");
+          break;
+        }
       }
     }
   }
